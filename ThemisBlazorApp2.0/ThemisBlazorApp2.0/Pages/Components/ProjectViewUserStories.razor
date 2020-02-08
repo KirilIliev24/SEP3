@@ -1,0 +1,74 @@
+﻿@using ThemisBlazorApp2._0.Data.DataTransferObjects
+@using ThemisBlazorApp2._0.Data
+@inject DataModelService dataModelService
+
+<h4>User stories:</h4>
+@if (userStories != null && userStories.Count > 0)
+{
+    <table class="table" style=" width:90%; text-align: left; vertical-align: middle;">
+        <tbody>
+            <tr>
+                <th scope="col" style="border: 1px solid gainsboro; background-color: mediumpurple">Id</th>
+                <th scope="col" style="border: 1px solid gainsboro; text-align: center; background-color: mediumpurple">Description</th>
+            </tr>
+            @for (int i = 1; i <= userStories.Count; i++)
+            {
+
+                <tr>
+                    <td style="width: 30px; text-align: center; border: 1px solid gainsboro"><b>@i</b></td>
+                    <td style="border: 1px solid gainsboro">@userStories[i - 1].Description</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+   }
+else
+{
+    <h4 style="color:lightgray">No user stories found</h4>
+}
+
+<br />
+<h4>Product backlog:</h4>
+@if (backLogItems != null && backLogItems.Count > 0)
+{
+    <table class="table" style=" width:90%; text-align: left; vertical-align: middle;border: 1px solid grey;">
+        <tbody style="text-align: center; vertical-align: middle;">
+            <tr>
+                <th style="border: 1px solid gainsboro; background-color: mediumpurple">Id</th>
+                <th style="border: 1px solid gainsboro; background-color: mediumpurple">Description</th>
+                <th style="border: 1px solid gainsboro; background-color: mediumpurple">Priority</th>
+                <th style="border: 1px solid gainsboro; background-color: mediumpurple">Status</th>
+                <th style="border: 1px solid gainsboro; background-color: mediumpurple">Estimated</th>
+                <th style="border: 1px solid gainsboro; background-color: mediumpurple">Actual</th>
+            </tr>
+            @for (int i = 0; i < backLogItems.Count; i++)
+            {
+                <tr>
+                    <td style="width:3%; border: 1px solid gainsboro"><b>#@backLogItems[i].Id</b></td>
+                    <td style="text-align:left; border: 1px solid gainsboro">@backLogItems[i].Description</td>
+                    <td style="width:8%; border: 1px solid gainsboro">@backLogItems[i].Priority</td>
+                    <td style="width:8%; border: 1px solid gainsboro">@backLogItems[i].Status</td>
+                    <td style="border: 1px solid gainsboro">@backLogItems[i].EstimatedTime</td>
+                    <td style="border: 1px solid gainsboro">@backLogItems[i].ActualTime</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+else
+{
+    <h4 style="color:lightgray">No backlog items found</h4>
+}
+
+@code {
+    [Parameter] public string projectName { get; set; }
+    private List<UserStory> userStories { get; set; }
+    private List<BackLogItem> backLogItems { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        userStories = dataModelService.GetProjectByName(projectName).UserStories;
+        backLogItems = dataModelService.GetProjectByName(projectName).BackLogItems;
+    }
+
+}

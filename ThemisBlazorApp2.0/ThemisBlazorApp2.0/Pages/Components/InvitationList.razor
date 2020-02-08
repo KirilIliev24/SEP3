@@ -1,0 +1,34 @@
+﻿@using ThemisBlazorApp2._0.Data
+@inject DataModelService dataModelService
+
+@if (loading)
+{
+    <p>Loading...</p>
+}
+else
+{   
+    <h4>Invitations to work on a project:</h4>
+    <br />
+    @if (dataModelService.invitedToProjects != null && dataModelService.invitedToProjects.Length != 0)
+    {
+        @foreach (var projectName in dataModelService.invitedToProjects)
+        {
+            <Invitation projectName="@projectName" OnSelected="updateList" />
+        }
+    }
+
+}
+@code {
+    private bool loading = true;
+
+    private void updateList(string message)
+    {
+        StateHasChanged();
+    }
+    protected override async Task OnInitializedAsync()
+    {
+        var success = await dataModelService.getUserInvitations();
+        if (success)
+            loading = false;
+    }
+}

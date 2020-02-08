@@ -1,0 +1,48 @@
+﻿@page "/register"
+@using ThemisBlazorApp2._0.Data
+@inject DataModelService dataModelService
+@inject NavigationManager NavigationManager
+
+<div class="login-page">
+    <div class="form">
+        <div class="register-form">
+            <input type="text" placeholder="First Name" @bind="fName" />
+            <input type="text" placeholder="Last Name" @bind="lName" />
+            <input type="text" placeholder="Username" @bind="username" />
+            <div>@Error</div>
+            <input type="password" placeholder="Password" @bind="password" />
+            <input type="text" placeholder="Email address" @bind="email" />
+            <button class="btn btn-primary" @onclick="createUser">create</button>
+            <p class="message">Already registered? <NavLink href="login">Sign In</NavLink></p>
+        </div>
+    </div>
+</div>
+
+@code {
+    private string Error { get; set; }
+    private string fName { get; set; }
+    private string lName { get; set; }
+    private string username { get; set; }
+    private string password { get; set; }
+    private string email { get; set; }
+
+    private async Task createUser()
+    {
+        if ((fName != null && !fName.Equals("")) &&
+            (lName != null && !lName.Equals("")) &&
+            (username != null && !username.Equals("")) &&
+            (password != null && !password.Equals("")) &&
+            (email != null && !email.Equals("")))
+        {
+            var success = await dataModelService.submitNewUser(fName, lName, username, password, email);
+            if (success)
+            {
+                NavigationManager.NavigateTo("/welcome", true);
+            }
+            else
+            {
+                Error = "Username already exists";
+            }
+        }
+    }
+}

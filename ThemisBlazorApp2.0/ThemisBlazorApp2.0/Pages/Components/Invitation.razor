@@ -1,0 +1,44 @@
+﻿@using ThemisBlazorApp2._0.Data
+@inject DataModelService dataModelService
+
+<div class="component" style="background-color:white;">
+    <div class="textInComponent">
+        <h6>@projectName</h6>
+    </div>
+    <div class="buttonsInComponent">
+        @if (loading == false)
+        {
+            <button class="buttonAccept" @onclick="acceptInvitation"><i class="fa fa-check"></i></button>
+            <button class="buttonDecline" @onclick="deleteInvitation"><i class="fa fa-trash"></i></button>
+        }
+        else
+        {
+            <div class="lds-circle"><div></div></div>
+        }
+    </div>
+</div>
+@code {
+    [Parameter] public string projectName { get; set; }
+    [Parameter] public EventCallback<string> OnSelected { get; set; }
+    private bool loading = false;
+
+    private async Task acceptInvitation()
+    {
+        loading = true;
+        await Task.Delay(2000);
+        var booleanaa = await dataModelService.acceptInvitationToProject(projectName);
+        if(booleanaa)
+            await OnSelected.InvokeAsync("update");
+        loading = false;
+    }
+
+    private async Task deleteInvitation()
+    {
+        loading = true;
+        await Task.Delay(2000);
+        var booleanaa = await dataModelService.declineInvitationToProject(projectName);
+        if(booleanaa)
+            await OnSelected.InvokeAsync("update");
+        loading = false;
+    }
+}

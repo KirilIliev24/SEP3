@@ -1,0 +1,133 @@
+﻿@using ThemisBlazorApp2._0.Data.DataTransferObjects
+@using ThemisBlazorApp2._0.Data
+@using ChartJs.Blazor.ChartJS.BarChart
+@using ChartJs.Blazor.ChartJS.BarChart.Axes
+@using ChartJs.Blazor.ChartJS.Common.Axes
+@using ChartJs.Blazor.ChartJS.Common.Axes.Ticks
+@using ChartJs.Blazor.ChartJS.Common.Properties
+@using ChartJs.Blazor.ChartJS.Common.Wrappers
+@using ChartJs.Blazor.Charts
+
+@inject DataModelService dataModelService
+<div class="chart">
+    <ChartJsBarChart @ref="_barChart"
+                     Config="@_barChartConfig"
+                     Width="300"
+                     Height="75" />
+</div>
+
+@code {
+    [Parameter] public string projectName { get; set; }
+
+    [Parameter] public string statusToSort { get; set; }
+    [Parameter] public List<BackLogItem> backlogs { get; set; }
+    private List<Sprint> sprints { get; set; }
+
+    private BarConfig _barChartConfig;
+    private ChartJsBarChart _barChart;
+    private BarDataset<DoubleWrapper> _barDataSet;
+    private BarDataset<DoubleWrapper> _barDataSet2;
+    
+    protected override void OnInitialized()
+    {
+        _barChartConfig = new BarConfig
+        {
+            Options = new BarOptions
+            {
+                Responsive = true,
+                Scales = new BarScales
+                {
+
+                    YAxes = new List<CartesianAxis> {
+                    new LinearCartesianAxis {
+                        Ticks = new LinearCartesianTicks {
+                            AutoSkip = false,
+                            Min = 0                             
+                        }
+                    }
+                    },
+                    XAxes = new List<CartesianAxis>
+                    {
+                        new BarCategoryAxis
+                        {
+                            Offset = true,
+                            MaxBarThickness = 50
+                        }
+                    }
+                }
+            }
+        };
+
+        _barChartConfig.Data.Labels.AddRange(listOfBlis()); //Has to be replaced with the number of finished backlog items, like: {"1", "2", "3", "4", "5"}
+
+        _barDataSet = new BarDataset<DoubleWrapper>
+        {
+            Label = "Estimated time",
+            BackgroundColor = "#C97FFF",
+            BorderWidth = 0,
+            HoverBorderWidth = 1,
+            BorderColor = "#ffffff",
+
+        };
+        _barDataSet2 = new BarDataset<DoubleWrapper>
+        {
+            Label = "Actual time",
+            BackgroundColor = "#FF8C8C ",
+            BorderWidth = 0,
+            HoverBorderWidth = 1,
+            BorderColor = "#ffffff"
+        };
+
+        _barDataSet.AddRange(estimatedHours().Wrap()); //Has to be replaces with each finished backlog item's estimated hours, like {4, 3, 6, 2}
+        _barChartConfig.Data.Datasets.Add(_barDataSet);
+
+        _barDataSet2.AddRange(actualHours().Wrap());//Has to be replaces with each finished backlog item's actual hours, like {4, 3, 6, 2}
+        _barChartConfig.Data.Datasets.Add(_barDataSet2);
+    }
+
+    private string[] listOfBlis() //should work if it was implemented in line 64. The only problem is that I don't know how to send here which sprint is called, from ProjectViewSprint class
+    {
+        int done = 0;
+        List<int> ints = new List<int>();
+        for (int e = 0; e < backlogs.Count; e++)
+        {
+            if (backlogs[e].Status.Equals("Done"))
+            {
+                done++;
+                ints.Add(done);
+            }
+        }
+        int[] array = ints.ToArray();
+        string[] result = array.Select(x => x.ToString()).ToArray();
+        
+        return result;
+    }
+    private double[] estimatedHours()
+    {
+        List<double> ints = new List<double>();
+        for (int e = 0; e < backlogs.Count; e++)
+        {
+            if (backlogs[e].Status.Equals("Done"))
+            {
+                ints.Add(backlogs[e].EstimatedTime);
+            }
+        }
+        double[] array = ints.ToArray();
+        return array;
+    }
+
+    private double[] actualHours()
+    {
+        List<double> ints = new List<double>();
+        for (int e = 0; e < backlogs.Count; e++)
+        {
+            if (backlogs[e].Status.Equals("Done"))
+            {
+                ints.Add(backlogs[e].ActualTime);
+            }
+        }
+        double[] array = ints.ToArray();
+        return array;
+    }
+}
+

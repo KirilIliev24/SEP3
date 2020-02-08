@@ -1,0 +1,227 @@
+﻿@using ThemisBlazorApp2._0.Data.DataTransferObjects
+@using ThemisBlazorApp2._0.Data
+@inject DataModelService dataModelSerivce
+
+<h3>Add new user story:</h3>
+<div class="backgroundForm" style="align-items:center;">
+    <div style="height:40px;margin-right:10px;width:100%;">
+        <input style="height:inherit; width:100%;" type="text" placeholder="User story" @bind="userStoryToAdd" />
+    </div>
+    <button type="button" class="enterProjectButton" style="width:40px;" @onclick="createNewUserStory">
+        <span class="oi oi-plus" aria-hidden="true"></span>
+    </button>
+    <div>@UserStoryError</div>
+</div>
+@if (userStories != null && userStories.Count != 0)
+{
+    <table class="table" style="text-align: left; vertical-align: middle;">
+        <tbody>
+            @foreach (var userStory in userStories)
+            {
+                <tr>
+                    <td>@userStory.Description</td>
+                    <td style="padding: 0rem; height: 40px; width:120px;">
+                        <button class="enterProjectButton" style="height:40px; width:100%; margin: 1px; border-radius:3px;"
+                                @onclick="@(e => toggleUSPopUp(userStory.Description))">
+                            Edit
+                        </button>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+@if (editUserStoryPopUp)
+{
+    <div id="popup1" class="overlay">
+        <div class="popup">
+            <h4>Edit user story:</h4>
+            <button class="close" @onclick="(() => { editUserStoryPopUp = false; })">&times;</button>
+            <div class="content" style="display:flex; flex-direction:column; width:100%; align-items:center; justify-content:center;">
+                <div><p>Previous user story description: <i>@previousUserStory</i></p></div>
+                <div style="display:flex;">
+                    <div style="height:40px;margin-right:10px;width:300px;">
+                        <input style="height:inherit; width:100%;" type="text" placeholder="New user story description" @bind="newUserStory" />
+                    </div>
+                    <button type="button" class="enterProjectButton" style="width:60px;" @onclick="editUserStory">
+                        Save
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+<h3>Add new Backlog item:</h3>
+<div class="backgroundForm" style="align-items:center;">
+    <select class="form-control" id="selectOption" @bind="backlogItemPriority">
+        <option disabled selected hidden>Priority</option>
+        <option>Very high</option>
+        <option>High</option>
+        <option>Medium</option>
+        <option>Low</option>
+        <option>Very low</option>
+    </select>
+    <div style="height:40px;margin-right:10px;width:80%;">
+        <input style="height:inherit; width:100%;" type="text" placeholder="Backlog item description" @bind="backlogItemDescription" />
+    </div>
+    <div style="height:40px;margin-right:10px;width:220px;line-height:40px;"><b>Estimated time (h):</b></div>
+    <select class="form-control" id="selectOption" style="width:80px;" @bind="backlogItemEstimated">
+        @for (int i = 1; i <= 36; i++)
+        {
+            <option>@i</option>
+        }
+    </select>
+    <button type="button" class="enterProjectButton" @onclick="createNewBacklogItem">
+        <span class="oi oi-plus" aria-hidden="true"></span>
+    </button>
+    <div>@BacklogError</div>
+</div>
+@if (backLogItems != null && backLogItems.Count != 0)
+{ 
+<table class="table" style="text-align: left; vertical-align: middle;">
+    <tbody style="text-align: center; vertical-align: middle;">
+        @foreach (var backLogItem in backLogItems)
+        {
+            <tr>
+                <td style="width:3%;"><b>#@backLogItem.Id</b></td>
+                <td style="text-align:left;">@backLogItem.Description</td>
+                <td style="width:8%;">@backLogItem.Priority</td>
+                <td style="width:8%;">@backLogItem.Status</td>
+                <td>@backLogItem.EstimatedTime</td>
+                <td>@backLogItem.ActualTime</td>
+                <td style="padding: 0rem; height: 40px; width:120px;">
+                    <button class="enterProjectButton" style="height:40px; width:100%; margin: 1px; border-radius:3px;"
+                            @onclick="@(e => toggleBIPopUp(backLogItem.Id))">
+                        Edit
+                    </button>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+}
+@if (editBacklogPopUp)
+{
+    <div id="popup1" class="overlay">
+        <div class="popup">
+            <h4>Edit backlog item @backlogId:</h4>
+            <button class="close" @onclick="(() => { editBacklogPopUp = false; })">&times;</button>
+            <div class="content" style="display:flex; width:100%; align-items:center; justify-content:center;">
+                <div style="height:40px;margin-right:10px;width:300px;">
+                    <input style="height:inherit; width:100%;" type="text" placeholder="New backlog item description" @bind="newBacklogItemDescription" />
+                </div>
+                <button type="button" class="enterProjectButton" style="width:60px;" @onclick="updateBacklogItem">
+                    Save
+                </button>
+            </div>
+        </div>
+    </div>
+}
+
+@code {
+    public string BacklogError { get; set; }
+    public string UserStoryError { get; set; }
+
+    [Parameter] public string projectName { get; set; }
+
+    public List<UserStory> userStories { get; set; }
+    private string previousUserStory;
+    private string newUserStory;
+    public List<BackLogItem> backLogItems { get; set; }
+    private int backlogId { get; set; }
+    private string newBacklogItemDescription { get; set; }
+
+    private bool editUserStoryPopUp = false;
+    private bool editBacklogPopUp = false;
+
+    private string userStoryToAdd { get; set; }
+
+    private string backlogItemPriority { get; set; }
+    private string backlogItemDescription { get; set; }
+    private int backlogItemEstimated { get; set; }
+
+    private async Task createNewUserStory()
+    {
+        bool successMessage = await dataModelSerivce.createUserStory(projectName, userStoryToAdd);
+        if (successMessage)
+        {
+            userStories = dataModelSerivce.GetProjectByName(projectName).UserStories;
+            StateHasChanged();
+            userStoryToAdd = "";
+            UserStoryError = "";
+        }
+        else
+        {
+            UserStoryError = "Put in a description";
+        }
+    }
+
+    public void toggleUSPopUp(string desc)
+    {
+        previousUserStory = desc;
+        editUserStoryPopUp = true;
+    }
+
+    private async Task editUserStory()
+    {
+        if (newUserStory != null && newUserStory.Equals("") == false)
+        {
+            string[] tempArray = new string[2];
+            tempArray[0] = previousUserStory;
+            tempArray[1] = newUserStory;
+            await dataModelSerivce.updateUserStoryDesc(projectName, tempArray);
+            StateHasChanged();
+            newUserStory = "";
+            userStories = dataModelSerivce.GetProjectByName(projectName).UserStories;
+            editUserStoryPopUp = false;
+        }
+    }
+
+    private async Task createNewBacklogItem()
+    {
+        if ((backlogItemPriority != null && backlogItemPriority.Equals("") == false) &&
+            (backlogItemDescription != null && backlogItemDescription.Equals("") == false) &&
+            (backlogItemEstimated != null && backlogItemEstimated != 0))
+        {
+            bool successMessage2 = await dataModelSerivce.createBackLogItem(projectName, backlogItemPriority, backlogItemDescription, backlogItemEstimated);
+            if (successMessage2)
+            {
+                backLogItems = dataModelSerivce.GetProjectByName(projectName).BackLogItems;
+                StateHasChanged();
+                backlogItemPriority = "";
+                backlogItemDescription = "";
+                backlogItemEstimated = 0;
+                BacklogError = "";
+            }
+        }
+        else
+        {
+            BacklogError = "Fill all fields";
+        }
+    }
+
+    public void toggleBIPopUp(int id)
+    {
+        backlogId = id;
+        editBacklogPopUp = true;
+    }
+
+    private async Task updateBacklogItem()
+    {
+        if (newBacklogItemDescription != null && newBacklogItemDescription.Equals("") == false)
+        {
+            await dataModelSerivce.editBacklogDescription(projectName, backlogId.ToString(), newBacklogItemDescription);
+            StateHasChanged();
+            backLogItems = dataModelSerivce.GetProjectByName(projectName).BackLogItems;
+            newBacklogItemDescription = "";
+            editBacklogPopUp = false;
+        }
+    }
+
+    protected override void OnInitialized()
+    {
+        userStories = dataModelSerivce.GetProjectByName(projectName).UserStories;
+        backLogItems = dataModelSerivce.GetProjectByName(projectName).BackLogItems;
+    }
+}

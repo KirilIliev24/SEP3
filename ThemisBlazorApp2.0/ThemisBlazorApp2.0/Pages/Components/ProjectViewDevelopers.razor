@@ -1,0 +1,52 @@
+﻿@using ThemisBlazorApp2._0.Data.DataTransferObjects
+@using ThemisBlazorApp2._0.Data
+@inject DataModelService dataModelService
+<h3>Developers working on the project:</h3>
+<br />
+<table class="table" style="text-align: center; width:90%;">
+    <tbody>
+        @if (workGroup.Creator != null)
+        {
+            <tr>
+                <td>@workGroup.Creator.firstName @workGroup.Creator.lastName (Creator)</td>
+                <td>@workGroup.Creator.email</td>
+                <td>@workGroup.Creator.username</td>
+            </tr>
+        }
+        @if (workGroup.ProductOwner != null)
+        {
+            <tr>
+                <td>@workGroup.ProductOwner.firstName @workGroup.ProductOwner.lastName (Product Owner)</td>
+                <td>@workGroup.ProductOwner.email</td>
+                <td>@workGroup.ProductOwner.username</td>
+            </tr>
+        }
+        @if (workGroup.ScrumMaster != null)
+        {
+            <tr>
+                <td>@workGroup.ScrumMaster.firstName @workGroup.ScrumMaster.lastName (SCRUM Master)</td>
+                <td>@workGroup.ScrumMaster.email</td>
+                <td>@workGroup.ScrumMaster.username</td>
+            </tr>
+        }
+        @foreach (var Developer in workGroup.Developers)
+        {
+            <tr>
+                <td>@Developer.firstName @Developer.lastName</td>
+                <td>@Developer.email</td>
+                <td>@Developer.username</td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+
+@code {
+    [Parameter] public string projectName { get; set; }
+    private WorkGroup workGroup { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        workGroup = dataModelService.GetProjectByName(projectName).WorkGroup;
+    }
+}

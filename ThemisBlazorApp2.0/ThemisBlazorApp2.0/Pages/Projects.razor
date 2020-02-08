@@ -1,0 +1,79 @@
+﻿@layout MainLayout
+@page "/projects"
+
+@using ThemisBlazorApp2._0.Data.DataTransferObjects
+@using ThemisBlazorApp2._0.Data
+@inject DataModelService dataModelService
+
+<h1>Projects</h1>
+<br />
+@if (loading)
+{
+    <p><em>Loading...</em></p>
+}
+else
+{
+    @if (projects == null || projects.Length == 0)
+    {
+        <h3 style="color:lightgrey">You aren't participating in any project</h3> }
+    else
+    {
+        @foreach (var project in projects)
+        {
+            <ThemisBlazorApp2._0.Pages.Components.ProjectComponent project="@project" />
+        }
+        <br />
+    }
+}
+<div style="margin-bottom:20px;">
+<button type="button" class="createNewProject" @onclick="toggleCreation">
+    <span class="oi oi-plus" aria-hidden="true"></span> Start new project
+</button>
+@if (togglecreateNew)
+{
+<div class="backgroundForm" style="border-top-right-radius:0; border-top-left-radius:0; margin-left:5%; margin-right:5%; margin-top:0; min-height:70px; width:90%; align-items:center; justify-content:center;">
+    <input style="height:40px; margin-right:10px;" type="text" placeholder="Project name" @bind="newProjectName" />
+    <button type="button" class="enterProjectButton" @onclick="submitNewProject">Create</button>
+    <span>@Error</span>
+</div>
+}
+</div>
+
+@code {
+    public string Error;
+    Project[] projects;
+    bool togglecreateNew = false;
+    bool loading = true;
+    private string newProjectName;
+
+    private async Task submitNewProject()
+    {
+        if (newProjectName != null && !newProjectName.Equals(""))
+        {
+            var success = await dataModelService.submitProject(newProjectName);
+            if (success)
+            {
+                projects = dataModelService.userProjects;
+                togglecreateNew = false;
+                newProjectName = null;
+            }
+            else 
+            {
+                Error = "A project with that name already exists";
+            }
+        }
+    }
+
+    private void toggleCreation()
+    {
+        togglecreateNew = !togglecreateNew;
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        var receive = await dataModelService.receiveProjects(dataModelService.loggedIn.username);
+        if (receive)
+            projects = dataModelService.userProjects;
+        loading = false;
+    }
+}

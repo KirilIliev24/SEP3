@@ -1,0 +1,91 @@
+﻿@using ThemisBlazorApp2._0.Data.DataTransferObjects
+@using ThemisBlazorApp2._0.Data
+@inject DataModelService dataModelService
+
+<div style="display:flex; height:100%; width:100%; padding-left:10px; padding-right:10px;">
+    <div style="height:100%; width:25%; padding-left:10px; padding-right:10px;">
+        @foreach (BackLogItem item in firstItemRow)
+        {
+            <BacklogItem backlogItem="@item" e="startWorking" />
+        }
+    </div>
+    <div style="height:100%; width:25%; padding-left:10px; padding-right:10px;">
+        @foreach (BackLogItem item in secondItemRow)
+        {
+            <BacklogItem backlogItem="@item" e="startWorking" />
+        }
+    </div>
+    <div style="height:100%; width:25%; padding-left:10px; padding-right:10px;">
+        @foreach (BackLogItem item in thirdItemRow)
+        {
+            <BacklogItem backlogItem="@item" e="startWorking" />
+        }
+    </div>
+    <div style="height:100%; width:25%; padding-left:10px; padding-right:10px;">
+        @foreach (BackLogItem item in fourthItemRow)
+        {
+            <BacklogItem backlogItem="@item" e="startWorking" />
+        }
+    </div>
+</div>
+
+@code {
+    //[Parameter] public string projectName { get; set; }
+    [Parameter] public List<BackLogItem> backlogs { get; set; }
+    [Parameter] public string statusToSort { get; set; }
+    [Parameter] public EventCallback<string> OnUpdate { get; set; }
+
+    private List<BackLogItem> firstItemRow;
+    private List<BackLogItem> secondItemRow;
+    private List<BackLogItem> thirdItemRow;
+    private List<BackLogItem> fourthItemRow;
+
+    public async Task startWorking(string msg)
+    {
+        await OnUpdate.InvokeAsync("upd");
+        OnInitialized();
+    }
+
+    protected override void OnInitialized()
+    {
+        firstItemRow = new List<BackLogItem>();
+        secondItemRow = new List<BackLogItem>();
+        thirdItemRow = new List<BackLogItem>();
+        fourthItemRow = new List<BackLogItem>();
+        int fstLength = 0;
+        int sLength = 0;
+        int tLength = 0;
+        int frthLength = 0;
+        if(backlogs != null)
+            for (int i = 0; i < backlogs.Count; i++)
+            {
+                if (backlogs[i].Status.Equals(statusToSort))
+                {
+                    if (fstLength <= sLength && fstLength <= tLength && fstLength <= frthLength)
+                    {
+                        fstLength += backlogs[i].Description.Length;
+                        firstItemRow.Add(backlogs[i]);
+                    }
+                    else if (sLength <= fstLength && sLength <= tLength && sLength <= frthLength)
+                    {
+                        sLength += backlogs[i].Description.Length;
+                        secondItemRow.Add(backlogs[i]);
+                    }
+                    else if (tLength <= fstLength && tLength <= sLength && tLength <= frthLength)
+                    {
+                        tLength += backlogs[i].Description.Length;
+                        thirdItemRow.Add(backlogs[i]);
+                    }
+                    else if (frthLength <= fstLength && frthLength <= sLength && frthLength <= tLength)
+                    {
+                        frthLength += backlogs[i].Description.Length;
+                        fourthItemRow.Add(backlogs[i]);
+                    }
+                    else
+                    {
+                        fstLength += backlogs[i].Description.Length;
+                    }
+                }
+            }
+    }
+}

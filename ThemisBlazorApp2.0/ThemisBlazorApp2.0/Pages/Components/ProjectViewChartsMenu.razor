@@ -1,0 +1,77 @@
+﻿@using ThemisBlazorApp2._0.Data.DataTransferObjects
+@using ThemisBlazorApp2._0.Data
+@using ChartJs.Blazor.ChartJS.BarChart
+@using ChartJs.Blazor.ChartJS.BarChart.Axes
+@using ChartJs.Blazor.ChartJS.Common.Axes
+@using ChartJs.Blazor.ChartJS.Common.Axes.Ticks
+@using ChartJs.Blazor.ChartJS.Common.Properties
+@using ChartJs.Blazor.ChartJS.Common.Wrappers
+@using ChartJs.Blazor.Charts
+@using ChartJs.Blazor.Util
+@inject DataModelService dataModelSerivce
+
+<div style="height: 300px; width: 500px">
+    <ChartJsBarChart @ref="_barChart"
+                     Config="@_barChartConfig"
+                     Width="300"
+                     Height="150" />
+</div>
+
+@code {
+    private BarConfig _barChartConfig;
+    private ChartJsBarChart _barChart;
+    private BarDataset<DoubleWrapper> _barDataSet;
+    private BarDataset<DoubleWrapper> _barDataSet2;
+
+    protected override void OnInitialized()
+    {
+        _barChartConfig = new BarConfig
+        {
+            Options = new BarOptions
+            {
+                Title = new OptionsTitle
+                {
+                    Display = true,
+                    Text = "Simple Bar Chart"
+                },
+                Responsive = true,
+                Scales = new BarScales
+                {
+                    YAxes = new List<CartesianAxis> {
+                        new LinearCartesianAxis {
+                            Ticks = new LinearCartesianTicks {
+                                AutoSkip = false,
+                                Min = 0 // Otherwise the lowest value in the dataset won't be visible
+
+                            }
+                        }
+                    }
+                }
+            }
+        };
+
+        _barChartConfig.Data.Labels.AddRange(new[] { "A", "B", "C", "D", "E" });
+
+        _barDataSet = new BarDataset<DoubleWrapper>
+        {
+            Label = "Estimated time",
+            BackgroundColor = "red",
+            BorderWidth = 0,
+            HoverBorderWidth = 1,
+            BorderColor = "#ffffff"
+        };
+        _barDataSet2 = new BarDataset<DoubleWrapper>
+        {
+            Label = "Actual time",
+            BackgroundColor = "blue",
+            BorderWidth = 0,
+            HoverBorderWidth = 1,
+            BorderColor = "#ffffff"
+        };
+        _barDataSet.AddRange(new double[] { }.Wrap());
+        _barChartConfig.Data.Datasets.Add(_barDataSet);
+
+        _barDataSet2.AddRange(new double[] {  }.Wrap());
+        _barChartConfig.Data.Datasets.Add(_barDataSet2);
+    }
+}

@@ -1,0 +1,128 @@
+﻿@using ThemisBlazorApp2._0.Data.DataTransferObjects
+@using ThemisBlazorApp2._0.Data
+@using ChartJs.Blazor.ChartJS.BarChart
+@using ChartJs.Blazor.ChartJS.BarChart.Axes
+@using ChartJs.Blazor.ChartJS.Common.Axes
+@using ChartJs.Blazor.ChartJS.Common.Axes.Ticks
+@using ChartJs.Blazor.ChartJS.Common.Properties
+@using ChartJs.Blazor.ChartJS.Common.Wrappers
+@using ChartJs.Blazor.Charts
+
+@inject DataModelService dataModelService
+
+    <div class="presentBlock">
+        @if (sprints != null && sprints.Count != 0)
+        {
+            <div style="display:flex; align-items:center; margin-bottom: 10px;">
+                <h4 style="margin-right:10px;">Sprint @sprints[sprints.Count - 1].Number</h4>
+                <div class="progress" style="width:300px; margin-right:10px">
+                    <div class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" aria-valuenow="50" aria-valuemin="0" aria-valuemax="100" style="width: @getWorkload(sprints[sprints.Count - 1])"></div>
+                </div>
+                <div>@getWorkload(sprints[sprints.Count - 1]) Tasks Completed</div>
+            </div>
+            <div class="doneBox">
+                <h5>Completed:</h5>
+                <div class="backgroundForm" style="margin-top:0; min-height:70px;">
+                    <BacklogItemList backlogs="sprints[sprints.Count - 1].BacklogItems" statusToSort="Done" OnUpdate="updateSprints" />
+                </div>
+            </div>
+            <div class="doneBox">
+                <h5>Being done:</h5>
+                <div class="backgroundForm" style="margin-top:0; min-height:70px;">
+                    <BacklogItemList backlogs="sprints[sprints.Count - 1].BacklogItems" statusToSort="Being done" OnUpdate="updateSprints" />
+                </div>
+            </div>
+            <div class="doneBox">
+                <h5>Not done:</h5>
+                <div class="backgroundForm" style="margin-top:0; min-height:70px;">
+                    <BacklogItemList backlogs="sprints[sprints.Count - 1].BacklogItems" statusToSort="Not done" OnUpdate="updateSprints" />
+                </div>
+            </div>
+            @for (int i = sprints.Count - 2; i >= 0; i--)
+            {
+                <div style="display:flex; align-items:center; margin-bottom: 10px;">
+                    <h4 style="margin-right:10px;">Sprint @sprints[i].Number</h4>
+                    <div class="progress" style="width:300px; margin-right:10px;">
+                        <div class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" aria-valuenow="50" aria-valuemin="0" aria-valuemax="100" style="width: @getWorkload(sprints[i])"></div>
+                    </div>
+                    <div>@getWorkload(sprints[i]) Tasks Completed</div>
+                </div>
+                <div class="doneBox">
+                    <h5>Completed:</h5>
+                    <div class="backgroundForm" style="margin-top:0; min-height:70px;">
+                        <BacklogItemList backlogs="sprints[i].BacklogItems" statusToSort="Done" OnUpdate="updateSprints" />
+                    </div>
+                    @if (hasDone(i))
+                    {
+                        <div class="chartBox">
+                            <BarChart backlogs="sprints[i].BacklogItems" statusToSort="Done" />
+                        </div>
+
+                    }
+                </div>
+            }
+        }
+        else
+        {
+            <h2>Sprints haven't started yet</h2>
+        }
+    </div>
+<br />
+
+@code {
+    [Parameter] public string projectName { get; set; }
+    public List<Sprint> sprints { get; set; }
+
+    private void updateSprints(string msg)
+    {
+        sprints = null;
+        StateHasChanged();
+        sprints = dataModelService.GetProjectByName(projectName).Sprints;
+        StateHasChanged();
+    }
+
+    protected override void OnInitialized()
+    {
+        sprints = dataModelService.GetProjectByName(projectName).Sprints;
+    }
+    
+    private string getWorkload(Sprint sprint)
+    {
+        List<BackLogItem> blis = sprint.BacklogItems;
+        int done = 0;
+        for (int i = 0; i < blis.Count; i++)
+        {
+            if (blis[i].Status.Equals("Done"))
+            {
+                done++;
+            }
+        }
+        string formAll = (blis.Count).ToString("N1");
+        double convert = Convert.ToDouble(formAll);
+        double workload = 100 * (done / convert);
+        string formed = "0%";
+        if (workload >= 0 && workload <= 100)
+        {
+            formed = ((int)workload).ToString() + "%";
+        }
+        return formed;
+    }
+
+    private bool hasDone(int i)
+    {
+        List<BackLogItem> blis = sprints[i].BacklogItems;
+        int done = 0;
+        for (int e = 0; e < blis.Count; e++)
+        {
+            if (blis[e].Status.Equals("Done"))
+            {
+                done++;
+            }
+        }
+        if (done == 0)
+        {
+            return false;
+        }
+        return true;
+    }
+}

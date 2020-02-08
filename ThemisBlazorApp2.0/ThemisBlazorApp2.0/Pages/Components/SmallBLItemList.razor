@@ -1,0 +1,112 @@
+﻿@using ThemisBlazorApp2._0.Data.DataTransferObjects
+@using ThemisBlazorApp2._0.Data
+@inject DataModelService dataModelService
+
+<div style="display:flex; height:100%; width:100%; padding-left:10px; padding-right:10px;">
+    <div style="height:100%; width:25%; padding-left:10px; padding-right:10px;">
+        @foreach (BackLogItem item in firstItemRow)
+        {
+            <ThemisBlazorApp2._0.Pages.Components.SmallBacklogItem backlogItem="@item" OnSelected="selectItem" />
+        }
+    </div>
+    <div style="height:100%; width:25%; padding-left:10px; padding-right:10px;">
+        @foreach (BackLogItem item in secondItemRow)
+        {
+            <ThemisBlazorApp2._0.Pages.Components.SmallBacklogItem backlogItem="@item" OnSelected="selectItem" />
+        }
+    </div>
+    <div style="height:100%; width:25%; padding-left:10px; padding-right:10px;">
+        @foreach (BackLogItem item in thirdItemRow)
+        {
+            <ThemisBlazorApp2._0.Pages.Components.SmallBacklogItem backlogItem="@item" OnSelected="selectItem" />
+        }
+    </div>
+    <div style="height:100%; width:25%; padding-left:10px; padding-right:10px;">
+        @foreach (BackLogItem item in fourthItemRow)
+        {
+            <ThemisBlazorApp2._0.Pages.Components.SmallBacklogItem backlogItem="@item" OnSelected="selectItem" />
+        }
+    </div>
+</div>
+@if (returnBacklogIds.Count != 0)
+{
+    <div style="justify-content:center; align-items:center; display:flex; margin-top:10px;">
+        <button class="enterProjectButton" @onclick="startNewSprint">Start</button>
+    </div>
+}
+
+@code {
+    [Parameter] public string projectName { get; set; }
+    [Parameter] public EventCallback<string> e {get; set;}
+    List<BackLogItem> backlogs { get; set; }
+
+    private List<BackLogItem> firstItemRow = new List<BackLogItem>();
+    private List<BackLogItem> secondItemRow = new List<BackLogItem>();
+    private List<BackLogItem> thirdItemRow = new List<BackLogItem>();
+    private List<BackLogItem> fourthItemRow = new List<BackLogItem>();
+
+    List<int> returnBacklogIds = new List<int>();
+
+    private bool showIdTable = false;
+
+    public void selectItem(int id)
+    {
+        if (returnBacklogIds.Contains(id))
+        {
+            returnBacklogIds.Remove(id);
+        }
+        else
+        {
+            returnBacklogIds.Add(id);
+        }
+    }
+
+    private async Task startNewSprint()
+    {
+        bool successMessage = await dataModelService.createNewSprint(projectName, returnBacklogIds.ToArray());
+        if (successMessage)
+        {
+            OnInitialized();
+            await e.InvokeAsync("new");
+        }
+    }
+
+    protected override void OnInitialized()
+    {
+        backlogs = dataModelService.GetProjectByName(projectName).BackLogItems;
+        int fstLength = 0;
+        int sLength = 0;
+        int tLength = 0;
+        int frthLength = 0;
+        for (int i = 0; i < backlogs.Count; i++)
+        {
+            if (backlogs[i].Status.Equals("Not done"))
+            {
+                if (fstLength <= sLength && fstLength <= tLength && fstLength <= frthLength)
+                {
+                    fstLength += backlogs[i].Description.Length;
+                    firstItemRow.Add(backlogs[i]);
+                }
+                else if (sLength <= fstLength && sLength <= tLength && sLength <= frthLength)
+                {
+                    sLength += backlogs[i].Description.Length;
+                    secondItemRow.Add(backlogs[i]);
+                }
+                else if (tLength <= fstLength && tLength <= sLength && tLength <= frthLength)
+                {
+                    tLength += backlogs[i].Description.Length;
+                    thirdItemRow.Add(backlogs[i]);
+                }
+                else if (frthLength <= fstLength && frthLength <= sLength && frthLength <= tLength)
+                {
+                    frthLength += backlogs[i].Description.Length;
+                    fourthItemRow.Add(backlogs[i]);
+                }
+                else
+                {
+                    fstLength += backlogs[i].Description.Length;
+                }
+            }
+        }
+    }
+}

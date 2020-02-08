@@ -1,0 +1,57 @@
+﻿@using ThemisBlazorApp2._0.Data.DataTransferObjects
+@using ThemisBlazorApp2._0.Data
+@inject DataModelService dataModelSerivce
+
+<button type="button" class="startNewSprint" @onclick="toggleOpen">
+    @if (dataModelSerivce.GetProjectByName(projectName).Sprints != null &&
+dataModelSerivce.GetProjectByName(projectName).Sprints.Count != 0)
+    {
+        <b>Start Sprint @(dataModelSerivce.GetProjectByName(projectName).Sprints.Count + 1)</b>
+    }
+    else
+    {
+        <b>Start Sprints</b>
+    }
+</button>
+@if (startSprintToggle)
+{
+    <div class="scrumMenuBox">
+        @if (dataModelSerivce.GetProjectByName(projectName).BackLogItems != null &&
+       dataModelSerivce.GetProjectByName(projectName).BackLogItems.Count != 0)
+        {
+            <div style="justify-content:center; align-items:center; display:flex; margin-top:10px;">
+                <p style="font-size:25px;">Click on items you want to work on this sprint:</p>
+            </div>
+            <SmallBLItemList projectName="@projectName" e="started" />
+        }
+        else
+        {
+            <div style="justify-content:center; align-items:center; display:flex;">
+                <h2 style="color:gray">Whoops! Ask Product Owner to create backlog items!</h2>
+            </div>
+        }
+    </div>
+}
+@code {
+
+    [Parameter] public string projectName { get; set; }
+    bool startSprintToggle = false;
+
+    private void toggleOpen()
+    {
+        startSprintToggle = !startSprintToggle;
+    }
+
+    private void started(string msg)
+    {
+        startSprintToggle = !startSprintToggle;
+    }
+
+
+
+
+
+
+
+
+}

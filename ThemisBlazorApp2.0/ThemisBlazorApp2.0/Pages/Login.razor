@@ -1,0 +1,41 @@
+﻿@page "/login"
+
+@using ThemisBlazorApp2._0.Data
+@inject DataModelService dataModelService
+@inject NavigationManager NavigationManager
+
+
+<div class="login-page">
+    <div class="form">
+        <div class="login-form">
+            <div>@Error</div>
+            <input type="text" placeholder="Username" @bind="usernameGiven" />
+            <input type="password" placeholder="Password" @bind="passwordGiven" />
+            <button class="btn btn-primary" @onclick="login">login</button>
+            <p class="message">Not registered? <NavLink href="register">Create an account</NavLink></p>
+        </div>
+    </div>
+</div>
+
+@code {
+    
+    public string Error { get; set; }
+    private string usernameGiven { get; set; }
+    private string passwordGiven { get; set; }
+
+    private async Task login()
+    {
+        if (usernameGiven == null && passwordGiven == null)
+        { NavigationManager.NavigateTo("/login", true); }
+        else
+        {
+            var result = await dataModelService.attemptLogin(usernameGiven, passwordGiven);
+            if (result)
+                NavigationManager.NavigateTo("/welcome", true);
+            else
+            {
+                Error = "Username or password are wrong";
+            }
+        }
+    }
+}

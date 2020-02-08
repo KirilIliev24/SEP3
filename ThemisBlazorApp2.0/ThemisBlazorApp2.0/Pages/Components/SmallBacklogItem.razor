@@ -1,0 +1,73 @@
+﻿@using ThemisBlazorApp2._0.Data.DataTransferObjects
+
+<div id="minBacklogFrame" @onclick="selectItem">
+    
+    <div id="minBacklogBanner" style="background-color:@bannerCollor">
+        @if (backlogItem.Priority != null)
+        {
+            <i>@backlogItem.Priority</i>
+        }
+    </div>
+    <div id="minBacklogBody" style="background-color:@bodyColor">
+        <div style="display:flex;">
+            <p>Description: @backlogItem.Description</p>
+        </div>
+        <div style="display:flex">
+            <p>Estimated time: @backlogItem.EstimatedTime hours</p>
+        </div>
+        <div style="display:flex;">
+        @if (backlogItem.WorksOnIt != null)
+        {
+            <p><b>Currently working on it:</b> @backlogItem.WorksOnIt.username</p>
+        }
+        </div>
+    </div>
+</div>
+
+@code {
+    [Parameter] public BackLogItem backlogItem { get; set; }
+    [Parameter] public EventCallback<int> OnSelected { get; set; }
+
+    public string bannerCollor { get; set; }
+    public string bodyColor = "antiquewhite";
+
+    private void selectItem()
+    {
+        if (bodyColor.Equals("antiquewhite"))
+            bodyColor = "darkseagreen";
+        else bodyColor = "antiquewhite";
+        OnSelected.InvokeAsync(backlogItem.Id);
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+
+        if (backlogItem.Priority != null)
+        {
+            if (backlogItem.Priority.Equals("Very high"))
+            {
+                bannerCollor = "#FF0000";
+            }
+            else if (backlogItem.Priority.Equals("High"))
+            {
+                bannerCollor = "#FF6100";
+            }
+            else if (backlogItem.Priority.Equals("Medium"))
+            {
+                bannerCollor = "#FF9700";
+            }
+            else if (backlogItem.Priority.Equals("Low"))
+            {
+                bannerCollor = "#FFBF00";
+            }
+            else if (backlogItem.Priority.Equals("Very low"))
+            {
+                bannerCollor = "#FFF73A";
+            }
+        }
+        else
+        {
+            bannerCollor = "white";
+        }
+    }
+}

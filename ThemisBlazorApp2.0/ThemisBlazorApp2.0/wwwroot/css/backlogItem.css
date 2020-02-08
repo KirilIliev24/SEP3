@@ -1,0 +1,79 @@
+﻿#minBacklogFrame {
+    display: block;
+    margin-top: 20px;
+    width: 100%;
+    min-height: 100px;
+}
+
+#minBacklogBanner {
+    border-top-left-radius: 10px;
+    border-top-right-radius: 10px;
+    width: 100%;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+#minBacklogBody {
+    box-shadow: inset 0px 15px 10px -20px;
+    border-bottom-left-radius: 10px;
+    border-bottom-right-radius: 10px;
+    width: 100%;
+    min-height: 60px;
+    background-color: antiquewhite;
+    display: flex;
+    flex-direction: column;
+    padding: 10px;
+}
+
+.overlay {
+    position: fixed;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: rgba(0, 0, 0, 0.7);
+    transition: opacity 500ms;
+    z-index:1;
+}
+
+.popup {
+    margin: 40vh auto;
+    padding: 20px;
+    background: #fff;
+    border-radius: 5px;
+    width: 30%;
+    position: relative;
+    transition: all 5s ease-in-out;
+}
+
+    .popup .close {
+        position: absolute;
+        top: 20px;
+        right: 30px;
+        transition: all 200ms;
+        font-size: 30px;
+        font-weight: bold;
+        text-decoration: none;
+        color: #333;
+    }
+
+        .popup .close:hover {
+            color: #06D85F;
+        }
+
+    .popup .content {
+        max-height: 30%;
+        overflow: auto;
+    }
+
+@media screen and (max-width: 700px) {
+    .box {
+        width: 70%;
+    }
+
+    .popup {
+        width: 70%;
+    }
+}

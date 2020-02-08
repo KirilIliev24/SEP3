@@ -1,0 +1,112 @@
+﻿@layout MainLayout
+@using ThemisBlazorApp2._0.Data.DataTransferObjects
+@using ThemisBlazorApp2._0.Data
+@inject DataModelService dataModelService
+@page "/projects/{projectName}"
+
+<h3 style="text-align:center">@projectName</h3>
+@if (loading)
+{
+    <p>Loading...</p>
+}
+else
+{
+    <div id="projectViewButtonGroup">
+        <div id="projectViewButtonDiv">
+            <input type="checkbox" class="projectinput" @bind="developerToggle" />
+            <div id="projectViewButton" @onclick="toggleDevelopers">Developers</div>
+        </div>
+        <div id="projectViewButtonDiv">
+            <input type="checkbox" class="projectinput" @bind="sprintToggle" />
+            <div id="projectViewButton" @onclick="toggleSprints"> Sprints </div>
+        </div>
+        <div id="projectViewButtonDiv">
+            <input type="checkbox" class="projectinput" @bind="userStoryToggle" />
+            <div id="projectViewButton" @onclick="toggleUserStories"> User stories & Product backlog </div>
+        </div>
+        @if (projectObject.WorkGroup.Creator != null &&
+          dataModelService.loggedIn.username.Equals(projectObject.WorkGroup.Creator.username))
+        {
+            <div id="projectViewButtonDiv">
+                <input type="checkbox" class="projectinput" @bind="CreatorToggle" />
+                <div id="projectViewButton" @onclick="toggleCreatorMenu"> Creator menu </div>
+            </div>
+        }
+        @if (projectObject.WorkGroup.ScrumMaster != null &&
+          dataModelService.loggedIn.username.Equals(projectObject.WorkGroup.ScrumMaster.username))
+        {
+            <div id="projectViewButtonDiv">
+                <input type="checkbox" class="projectinput" @bind="SMToggle" />
+                <div id="projectViewButton" @onclick="toggleSMMenu"> SCRUM Menu </div>
+            </div>
+        }
+        @if (projectObject.WorkGroup.ProductOwner != null &&
+          dataModelService.loggedIn.username.Equals(projectObject.WorkGroup.ProductOwner.username))
+        {
+            <div id="projectViewButtonDiv">
+                <input type="checkbox" class="projectinput" @bind="POToggle" />
+                <div id="projectViewButton" @onclick="togglePOMenu"> Product Menu </div>
+            </div>
+        }       
+    </div>
+    <br />
+    @if (developerToggle)
+    {
+        <ThemisBlazorApp2._0.Pages.Components.ProjectViewDevelopers projectName="@projectName" />
+    }
+    @if (sprintToggle)
+    {
+        <ThemisBlazorApp2._0.Pages.Components.ProjectViewSprints projectName="@projectName" />
+    }
+    @if (userStoryToggle)
+    {
+        <ThemisBlazorApp2._0.Pages.Components.ProjectViewUserStories projectName="@projectName" />
+    }
+    @if (CreatorToggle)
+    {
+        <ThemisBlazorApp2._0.Pages.Components.ProjectViewCreatorMenu projectName="@projectName" />
+    }
+    @if (SMToggle)
+    {
+        <ThemisBlazorApp2._0.Pages.Components.ProjectViewScrumMenu projectName="@projectName" />
+    }
+    @if (POToggle)
+    {
+        <ThemisBlazorApp2._0.Pages.Components.ProjectViewPOMenu projectName="@projectName" />
+    }
+    @if (ChartsToggle)
+    {
+         <ThemisBlazorApp2._0.Pages.Components.ProjectViewChartsMenu/>
+    }
+}
+
+@code {
+    [Parameter] public string projectName { get; set; }
+    public Project projectObject { get; set; }
+    private bool loading = true;
+
+    private bool developerToggle = true;
+    private bool sprintToggle = false;
+    private bool userStoryToggle = false;
+
+    private bool CreatorToggle = false;
+    private bool SMToggle = false;
+    private bool POToggle = false;
+    private bool ChartsToggle = false;
+
+    private void toggleDevelopers() { developerToggle = true; sprintToggle = userStoryToggle = CreatorToggle = SMToggle = POToggle = ChartsToggle = false; }
+    private void toggleSprints() { sprintToggle = true; developerToggle = userStoryToggle = CreatorToggle = SMToggle = POToggle = ChartsToggle =  false; }
+    private void toggleUserStories() { userStoryToggle = true; developerToggle = sprintToggle = CreatorToggle = SMToggle = POToggle = ChartsToggle =  false; }
+
+    private void toggleCreatorMenu() { CreatorToggle = true; developerToggle = sprintToggle = userStoryToggle = SMToggle = POToggle = ChartsToggle =  false; }
+    private void toggleSMMenu() { SMToggle = true; developerToggle = sprintToggle = userStoryToggle = CreatorToggle = POToggle = ChartsToggle =  false; }
+    private void togglePOMenu() { POToggle = true; developerToggle = sprintToggle = userStoryToggle = CreatorToggle = SMToggle = ChartsToggle =  false; }
+
+    private void toggleChartsMenu() { ChartsToggle = true; developerToggle = userStoryToggle = CreatorToggle = SMToggle = POToggle = sprintToggle =  false; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        projectObject = dataModelService.GetProjectByName(projectName);
+        loading = false;
+    }
+}

@@ -1,0 +1,124 @@
+﻿@using ThemisBlazorApp2._0.Data.DataTransferObjects
+@using ThemisBlazorApp2._0.Data
+@inject DataModelService dataModelService
+
+<div id="minBacklogFrame">
+    <div id="minBacklogBanner" style="background-color:@bannerCollor">
+        @if (backlogItem.Priority != null)
+        {
+            <i>@backlogItem.Priority</i>
+        }
+    </div>
+    <div id="minBacklogBody">
+        <div style="display:flex;">
+            <p>Description: @backlogItem.Description</p>
+        </div>
+        <div style="display:flex">
+            <p>Estimated time: @backlogItem.EstimatedTime hours</p>
+        </div>
+        @if (backlogItem.WorksOnIt == null)
+        {
+            <div style="display:flex; height:100%; margin:0; flex-direction:column-reverse; align-items: center; ">
+                <button class="enterProjectButton" @onclick="startWorking">Start</button>
+            </div>
+        }
+        else if (backlogItem.WorksOnIt != null)
+        {
+            <div style="display:flex">
+                <p>Works on it: @backlogItem.WorksOnIt.username</p>
+            </div>
+            @if (backlogItem.ActualTime != 0)
+            {
+                <div style="display:flex">
+                    <p>Actual time: @backlogItem.ActualTime hours</p>
+                </div>
+            }
+            @if (backlogItem.WorksOnIt.username.Equals(dataModelService.loggedIn.username) && backlogItem.Status.Equals("Being done"))
+            {
+                <div style="display:flex; height:100%; margin:0; flex-direction:column-reverse; align-items: center; ">
+                    <button class="enterProjectButton" @onclick="finishWorking">Finish</button>
+                </div>
+            }
+        }
+    </div>
+</div>
+@if (finishPopUp)
+{
+    <div id="popup1" class="overlay">
+        <div class="popup">
+            <h4>How much time did it take?</h4>
+            <button class="close" @onclick="(() => { finishPopUp = false; })">&times;</button>
+            <div class="content" style="display:flex; width:100%; align-items:center; justify-content:center;">
+                <select class="form-control" id="selectOption" style="width:80px; margin-right:10px;" @bind="backlogItemActual">
+                    @for (int i = 1; i <= 36; i++)
+                    {
+                        <option>@i</option>
+                    }
+                </select>
+                <button class="enterProjectButton" @onclick="setActualTime">Finish</button>
+            </div>
+        </div>
+    </div>
+}
+
+@code {
+    [Parameter] public BackLogItem backlogItem { get; set; }
+    [Parameter] public EventCallback<string> e { get; set; }
+    public string bannerCollor { get; set; }
+    private bool finishPopUp = false;
+    private int backlogItemActual { get; set; }
+    
+    public async Task startWorking()
+    {
+        string id = backlogItem.Id.ToString();
+        bool success = await dataModelService.startWorkingOnBacklog(id);
+        if (success)
+            e.InvokeAsync(id);
+    }
+
+    public void finishWorking()
+    {
+        finishPopUp = true;
+    }
+
+    public async Task setActualTime()
+    {
+        if (backlogItemActual != null && backlogItemActual != 0)
+        {
+            await dataModelService.finishWorkingOnBacklog(backlogItem.Id.ToString(), backlogItemActual.ToString());
+            e.InvokeAsync(backlogItem.Id.ToString());
+            finishPopUp = false;
+        }
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (backlogItem.Priority != null)
+        {
+            if (backlogItem.Priority.Equals("Very high"))
+            {
+                bannerCollor = "#FF0000";
+            }
+            else if (backlogItem.Priority.Equals("High"))
+            {
+                bannerCollor = "#FF6100";
+            }
+            else if (backlogItem.Priority.Equals("Medium"))
+            {
+                bannerCollor = "#FF9700";
+            }
+            else if (backlogItem.Priority.Equals("Low"))
+            {
+                bannerCollor = "#FFBF00";
+            }
+            else if (backlogItem.Priority.Equals("Very low"))
+            {
+                bannerCollor = "#FFF73A";
+            }
+        }
+        else
+        {
+            bannerCollor = "white";
+        }
+    }
+}

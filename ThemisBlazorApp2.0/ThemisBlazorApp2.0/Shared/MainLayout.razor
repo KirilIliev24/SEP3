@@ -1,0 +1,28 @@
+﻿@inherits LayoutComponentBase
+@using ThemisBlazorApp2._0.Data
+@inject DataModelService dataModelSerivce
+@inject NavigationManager navigationManager
+
+<div class="sidebar">
+    <NavMenu />
+</div>
+
+<div class="main">
+    <div class="top-row px-4">
+        <i>Welcome, @dataModelSerivce.loggedIn.firstName</i>
+            <div style="border-left:2px;border-radius:5px;padding:20px">
+                <img src="css/images/LogoutIcon.png" style="height:30px;width:30px;margin-left:20px" @onclick="logout" />
+            </div>
+</div>
+    <div class="content px-4">
+        @Body
+    </div>
+</div>
+
+@code{
+    private void logout()
+    {
+        dataModelSerivce.cleanData();
+        navigationManager.NavigateTo("/", true);
+    }
+}

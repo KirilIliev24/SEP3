@@ -1,0 +1,66 @@
+﻿@using ThemisBlazorApp2._0.Data.DataTransferObjects
+@using ThemisBlazorApp2._0.Data
+@inject DataModelService dataModelService
+<br />
+<h5>Add new User to the project:</h5>
+<div class="backgroundForm" style="align-items:center;">
+    <div style="height:40px;padding-right:10px;"><input style="height:inherit" type="text" placeholder="username" @bind="userToAdd" /></div>
+    <button type="button" class="enterProjectButton" @onclick="inviteNewUser">Invite</button>
+    <br>
+    <div>  @Message</div>
+</div>
+<h5>Assign a role for a developer:</h5>
+<div class="backgroundForm" style="align-items:center;">
+    <select class="form-control" id="selectOption" @bind="userToUpdate">
+        <option disabled selected hidden>Choose developer</option>
+        @foreach (var Developer in workGroup.Developers)
+        {
+            <option>@Developer.username</option>
+        }
+    </select>
+    <select class="form-control" id="selectOption" @bind="roleToAssign">
+        <option disabled selected hidden>Choose role</option>
+        <option>SCRUM Master</option>
+        <option>Product Owner</option>
+    </select>
+    <button class="enterProjectButton" @onclick="updateUserRole">Assign</button>
+</div>
+<br />
+
+     @code {
+         [Parameter] public string Message { get; set; }
+         [Parameter] public string projectName { get; set; }
+         public WorkGroup workGroup { get; set; }
+         public string userToAdd { get; set; }
+         private bool successAssigning=false;
+
+         public string userToUpdate { get; set; }
+         public string roleToAssign { get; set; }
+
+         private async Task updateUserRole()
+         {
+             if(userToUpdate != null && userToUpdate.Equals("") == false && roleToAssign != null && roleToAssign.Equals("") == false)
+             {
+                 successAssigning = await dataModelService.updateUserRole(userToUpdate, projectName, roleToAssign);
+                 OnInitializedAsync();
+             }
+         }
+
+         private async Task inviteNewUser()
+         {
+             bool successInviting = await dataModelService.inviteUserToProject(projectName, userToAdd);
+             if (successInviting == false)
+             {
+                 Message = "User is not in the system or is already in the project";
+             }
+             else
+             {
+                 Message = userToAdd + " was invited";
+             }
+         }
+
+         protected override async Task OnInitializedAsync()
+         {
+             workGroup = dataModelService.GetProjectByName(projectName).WorkGroup;
+         }
+}

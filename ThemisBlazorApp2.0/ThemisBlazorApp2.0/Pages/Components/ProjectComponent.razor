@@ -1,0 +1,81 @@
+﻿@using ThemisBlazorApp2._0.Data
+@using ThemisBlazorApp2._0.Data.DataTransferObjects
+@inject DataModelService dataModelService
+@inject NavigationManager NavManager
+
+
+<input type="checkbox" class="projectinput" @bind="toggleInfo" />
+<button class="projectComponent" @onclick="toggle">
+    <h4>@project.Name</h4>
+</button>
+
+@if (toggleInfo)
+{
+<div class="projectExtendedComponent">
+    @if (project.WorkGroup.Creator != null)
+    {
+        <div>
+            <b>Creator: </b><i>@project.WorkGroup.Creator.firstName (@project.WorkGroup.Creator.username)</i>
+        </div>
+    }
+    else
+    {
+        <div>
+            <b>Creator not assigned</b>
+        </div>
+    }
+    @if (project.WorkGroup.ScrumMaster != null)
+    {
+        <div>
+            <b>SCRUM Master: </b><i>@project.WorkGroup.ScrumMaster.firstName (@project.WorkGroup.ScrumMaster.username)</i>
+        </div>
+    }
+    else
+    {
+        <div>
+            <b>SCRUM Master not assigned</b>
+        </div>
+    }
+    @if (project.WorkGroup.ProductOwner != null)
+    {
+        <div>
+            <b>Product owner: </b><i>@project.WorkGroup.ProductOwner.firstName (@project.WorkGroup.ProductOwner.username)</i>
+        </div>
+    }
+    else
+    {
+        <div>
+            <b>Product owner not assigned</b>
+        </div>
+    }
+
+    @if (project.Sprints != null && project.Sprints.Count != 0)
+    {
+        <div><b><i>Sprint @project.Sprints.Count</i></b></div>
+    }
+    else
+    {
+        <div><b><i>Sprints haven't started yet</i></b></div>
+    }
+
+    <div style="display:flex; justify-content:flex-end; width:100%; height:100%; align-items:end;">
+        <button class="enterProjectButton" @onclick="enterProject">Enter</button>
+    </div>
+</div>
+
+}
+
+
+@code {
+    [Parameter] public Project project { get; set; }
+    bool toggleInfo = false;
+
+    private void toggle()
+    {
+        toggleInfo = !toggleInfo;
+    }
+    private void enterProject()
+    {
+        NavManager.NavigateTo($"/projects/{project.Name}", true);
+    }
+}

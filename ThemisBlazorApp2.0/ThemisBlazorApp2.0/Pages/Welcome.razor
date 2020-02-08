@@ -1,0 +1,69 @@
+﻿@layout MainLayout
+@page "/welcome"
+
+@using ThemisBlazorApp2._0.Data.DataTransferObjects
+@using ThemisBlazorApp2._0.Data
+@inject DataModelService dataModelService
+
+<h1>Hello, @dataModelService.loggedIn.username!</h1>
+<p>Welcome to Themis. This is your personal hub</p>
+<div class="backgroundForm" style="flex-direction:column;">
+    <ThemisBlazorApp2._0.Pages.Components.InvitationList />
+</div>
+<div class="backgroundForm" style="flex-direction:column;">
+   <div><h4>Items you are currently working on:</h4></div>
+    @if (personalBacklogItems.Count != 0)
+    {
+        <div><BacklogItemList backlogs="personalBacklogItems" statusToSort="Being done" OnUpdate="updateItems" /></div>
+    }
+</div>
+<p>Below you can see your user information:</p>
+<br />
+<div style="width:500px;background-color:rgb(230, 230, 230);border-radius:8px;box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);">
+    <table class="table">
+        <tbody>
+            <tr>
+                <td>First name:</td>
+                <td>@dataModelService.loggedIn.firstName</td>
+            </tr>
+            <tr>
+                <td>Last name:</td>
+                <td>@dataModelService.loggedIn.lastName</td>
+            </tr>
+            <tr>
+                <td>Username:</td>
+                <td>@dataModelService.loggedIn.username</td>
+            </tr>
+            <tr>
+                <td>Email:</td>
+                <td>@dataModelService.loggedIn.email</td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+
+@code{
+    List<BackLogItem> personalBacklogItems;
+
+    private async Task updateItems(string msg)
+    {
+        await OnInitializedAsync();
+    }
+    protected override async Task OnInitializedAsync()
+    {
+        personalBacklogItems = new List<BackLogItem>();
+        var receive = await dataModelService.receiveProjects(dataModelService.loggedIn.username);
+        if (dataModelService.userProjects != null && dataModelService.userProjects.Length > 0)
+        {
+            foreach(var project in dataModelService.userProjects)
+            {
+                if(project.BackLogItems != null)
+                    foreach(var backlogItem in project.BackLogItems)
+                    {
+                        if (backlogItem.Status.Equals("Being done") && backlogItem.WorksOnIt.username.Equals(dataModelService.loggedIn.username))
+                            personalBacklogItems.Add(backlogItem);
+                    }
+            }
+        }
+    }
+}
